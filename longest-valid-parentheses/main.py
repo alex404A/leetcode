@@ -14,32 +14,41 @@ class Solution(object):
         continuousRightCnt = 0
 
         for i in range(0, len(s)):
+            print(continuousRightCnt ,self.leftStack, self.rightStack, self.rightIndexToIntervalDict)
             if s[i] == '(':
                 self.popLastNElementsAndUpdate(continuousRightCnt)
-                leftStack.append(i)
+                self.leftStack.append(i)
                 continuousRightCnt = 0
-            else if s[i] == ')':
+            elif s[i] == ')':
                 if (continuousRightCnt == len(self.leftStack)):
                     self.popLastNElementsAndUpdate(continuousRightCnt)
                     continuousRightCnt = 0
                 else:
-                    rightStack.append(i)
+                    self.rightStack.append(i)
                     continuousRightCnt += 1
 
+        self.popLastNElementsAndUpdate(continuousRightCnt)
+        print(self.maxLen)
+        print(self.rightIndexToIntervalDict)
         return self.maxLen
 
     def popLastNElementsAndUpdate(self, n):
-        if n = 0:
+        if n == 0:
             return
-        leftIndex, rightIndex, newInterval
+        rightIndex = self.rightStack[len(self.rightStack) - 1]
         for i in range(0, n):
             leftIndex = self.leftStack.pop()
-            rightIndex = self.rightStack.pop()
-        leftInterval = rightIndexToIntervalDict.pop(leftIndex - 1, index)
+            self.rightStack.pop()
+        leftInterval = self.rightIndexToIntervalDict.pop(leftIndex - 1, None)
         if leftInterval is not None:
             newInterval = (leftInterval[0], rightIndex)
         else:
             newInterval = (leftIndex, rightIndex)
-        rightIndexToIntervalDict[rightIndex] = newInterval
+        self.rightIndexToIntervalDict[rightIndex] = newInterval
         if newInterval[1] - newInterval[0] + 1 > self.maxLen:
             self.maxLen = newInterval[1] - newInterval[0] + 1
+
+if __name__ == '__main__':
+    solution = Solution()
+    s = "))(()()))"
+    solution.longestValidParentheses(s)
