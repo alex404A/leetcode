@@ -14,7 +14,6 @@ class Solution(object):
         continuousRightCnt = 0
 
         for i in range(0, len(s)):
-            print(continuousRightCnt ,self.leftStack, self.rightStack, self.rightIndexToIntervalDict)
             if s[i] == '(':
                 self.popLastNElementsAndUpdate(continuousRightCnt)
                 self.leftStack.append(i)
@@ -28,8 +27,6 @@ class Solution(object):
                     continuousRightCnt += 1
 
         self.popLastNElementsAndUpdate(continuousRightCnt)
-        print(self.maxLen)
-        print(self.rightIndexToIntervalDict)
         return self.maxLen
 
     def popLastNElementsAndUpdate(self, n):
