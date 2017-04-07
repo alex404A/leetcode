@@ -8,7 +8,8 @@ class Solution(object):
         candidates = sorted([c for c in candidates if c <= target])
         if len(candidates) == 0:
             return []
-        return self.getCombination(candidates, target)
+        result = self.getCombination(candidates, target)
+        return [] if result is None else result
 
     def getCombination(self, candidates, target):
         if target == 0:
