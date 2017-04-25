@@ -4,35 +4,65 @@ class Solution(object):
         :type num: str
         :rtype: str
         """
-        def getBoundary(realNum, interval, numLen):
-            palLen = len(str(pal))
-            if palLen == numLen:
-                return pal
-            elif palLen > numLen:
-                result = 0
-                result += 1
-                if numLen >= 1:
-                    result += pow(10, numLen) * 1
-                    return result
-            else:
-                result = 0
-                for i in range(palLen):
-                    result += pow(10, i) * 9
-                return result
+        def getBoundary(realNum, intervals, isIncreased):
+            boundaries = []
+            for interval in intervals:
+                newBoundary = realNum + interval if isIncreased else realNum - interval
+                if isPalindrome(newBoundary):
+                    boundaries.append(newBoundary)
+            result = -1
+            maxInterval = 2147483647
+            for boundary in boundaries:
+                interval = abs(realNum - boundary)
+                if interval < maxInterval:
+                    result = boundary
+                    maxInterval = interval
+            return result
 
-        def getIntervals(numLen):
-            pass
+        def getIntervalsForOdd(numLen):
+            results = []
+            first = '1' * numLen
+            second = '1' * (numLen / 2) + '2' + '1' * (numLen / 2)
+            for i in range(numLen / 2 + 1):
+                results.append(int(second) - int(first))
+                lenForMidInFirst = 2 * i + 1
+                lenForSideInFirst = (numLen - lenForMidInFirst) / 2
+                first = '1' * lenForSideInFirst + '9' * lenForMidInFirst + '1' * lenForSideInFirst
+                lenForMidInSecond = lenForMidInFirst
+                lenForOneInSecond = (numLen - lenForMidInSecond - 2) / 2
+                second = '1' * lenForOneInSecond + '2' + '0' * lenForMidInSecond + '2' + '1' * lenForOneInSecond
+            results.append(2)
+            results.append(1)
+            return results
+
+        def getIntervalsForEven(numLen):
+            results = []
+            first = '1' * numLen
+            second = '1' * (numLen / 2 - 1) + '22' + '1' * (numLen / 2 - 1)
+            for i in range(numLen / 2):
+                results.append(int(second) - int(first))
+                lenForMidInFirst = 2 * (i + 1)
+                lenForSideInFirst = (numLen - lenForMidInFirst) / 2
+                first = '1' * lenForSideInFirst + '9' * lenForMidInFirst + '1' * lenForSideInFirst
+                lenForMidInSecond = lenForMidInFirst
+                lenForOneInSecond = (numLen - lenForMidInSecond - 2) / 2
+                second = '1' * lenForOneInSecond + '2' + '0' * lenForMidInSecond + '2' + '1' * lenForOneInSecond
+            results.append(2)
+            results.append(1)
+            return results
+
+        def isPalindrome(num):
+            numStr = str(num)
+            for i in range(len(numStr)):
+                j = len(numStr) - i - 1
+                if j <= i:
+                    return True
+                if numStr[i] != numStr[j]:
+                    return False
 
         numLen = len(num)
-        if numLen >= 2 and num[0] == '1' and num[1:] == '0' * (numLen - 1):
-            return '9' * (numLen - 1)
-
-        interval = 0
-        quotient = numLen / 2
-        if numLen % 2 == 0:
-            interval = pow(10, quotient - 1) + pow(10, quotient)
-        else:
-            interval = pow(10, quotient)
+        intervals = getIntervalsForOdd(numLen) if numLen % 2 else getIntervalsForEven(numLen)
+        print(intervals)
 
         firstPal = 0
         for i in range(numLen):
@@ -49,12 +79,12 @@ class Solution(object):
         secondPal = 0
         print(firstPal)
         if realNum == firstPal:
-            firstPal = getBoundary(realNum + interval, numLen)
-            secondPal = getBoundary(realNum - interval, numLen)
+            firstPal = getBoundary(realNum, intervals, True)
+            secondPal = getBoundary(realNum, intervals, False)
         elif realNum > firstPal:
-            secondPal = getBoundary(firstPal + interval, numLen)
+            secondPal = getBoundary(firstPal, intervals, True)
         else:
-            secondPal = getBoundary(firstPal - interval, numLen)
+            secondPal = getBoundary(firstPal, intervals, False)
         print(firstPal, secondPal)
 
         diff1 = abs(realNum - firstPal)
@@ -68,4 +98,4 @@ class Solution(object):
 
 if __name__ == '__main__':
     solution = Solution()
-    print(solution.nearestPalindromic('11011'))
+    print(solution.nearestPalindromic('2'))
