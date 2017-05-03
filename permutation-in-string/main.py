@@ -21,8 +21,11 @@ class Solution(object):
                 else:
                     self.genNewCopy(copyDict, letter)
             else:
-                if len(copyDict.get('letters')) > 0:
-                    copyDict = rawDict.copy()
+                letters = copyDict.get('letters')
+                if len(letters) > 0:
+                    for letter in letters:
+                        copyDict[letter] += 1
+                        copyDict['sum'] += 1
                     copyDict['letters'] = []
         return False
 
@@ -48,5 +51,5 @@ class Solution(object):
 if __name__ == '__main__':
     solution = Solution()
     s1 = "adc"
-    s2 = "dcda"
+    s2 = "adfghytdcda"
     print(solution.checkInclusion(s1, s2))
