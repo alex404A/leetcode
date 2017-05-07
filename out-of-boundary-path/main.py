@@ -16,7 +16,6 @@ class Solution(object):
 
     def find(self, m, n, N, i, j):
         if i == -1 or i == m or j == -1 or j == n:
-            self.results[(m, n, N, i, j)] = 1
             return 1
         if N == 0:
             return 0
