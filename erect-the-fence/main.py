@@ -44,22 +44,41 @@ class Solution(object):
     def collectPoles(self):
         xMax = xMin = self.points[0].x
         yMax = yMin = self.points[0].y
-        self.poles['left'] = self.poles['right'] = self.points[0]
-        self.poles['up'] = self.poles['down'] = self.points[0]
+        poles = {'left': [], 'up': [], 'right': [], 'down': []}
         for index, point in enumerate(self.points):
             if point.x > xMax:
                 xMax = point.x
-                self.poles['right'] = point
+                del poles['right'][:]
+                poles['right'].append(point)
+            elif point.x == xMax:
+                poles['right'].append(point)
             if point.x < xMin:
                 xMin = point.x
-                self.poles['left'] = point
+                del poles['left'][:]
+                poles['left'].append(point)
+            elif point.x == xMin:
+                poles['left'].append(point)
             if point.y > yMax:
                 yMax = point.y
-                self.poles['up'] = point
+                del poles['up'][:]
+                poles['up'].append(point)
+            elif point.y == yMax:
+                poles['up'].append(point)
             if point.y < yMin:
                 yMin = point.y
-                self.poles['down'] = point
-        self.printPoints('poles', [self.poles['left']] + [self.poles['up']] + [self.poles['right']] + [self.poles['down']])
+                del poles['down'][:]
+                poles['down'].append(point)
+            elif point.y == yMin:
+                poles['down'] = point
+        return poles
+        # self.printPoints('poles', [self.poles['left']] + [self.poles['up']] + [self.poles['right']] + [self.poles['down']])
+
+    def isFourPolesExisting(self, poles):
+        if len(set(poles['left'] + poles['right'] + poles['up'] + poles['down'])) <= 3:
+            return True
+
+    def isPointsEqual(self, point1, point2):
+        return True if point1.x == point2.x and point1.y == point2.y else False
 
     def distPoints(self):
         basicUpLeftSlope = self.calSlope(self.poles['up'], self.poles['left'])
@@ -85,8 +104,10 @@ class Solution(object):
                 currentSlope = self.calSlope(point, self.poles['down'])
                 if currentSlope <= basicDownLeftSlope:
                     self.intervals['downLeft'].append(point)
-        for key, value in self.intervals.iteritems():
-            value.sort(key = lambda item: item.x)
+        self.intervals['upLeft'].sort(key = lambda item: (item.x, item.y))
+        self.intervals['upRight'].sort(key = lambda item: (item.x, 0 - item.y))
+        self.intervals['downRight'].sort(key = lambda item: (0 - item.x, 0 - item.y))
+        self.intervals['downLeft'].sort(key = lambda item: (0 - item.x, item.y))
         self.printPoints('dist-up-left', self.intervals['upLeft'])
         self.printPoints('dist-up-right', self.intervals['upRight'])
         self.printPoints('dist-down-right', self.intervals['downRight'])
@@ -104,18 +125,17 @@ class Solution(object):
             for index, point in enumerate(points):
                 currentSlope = self.calSlope(startPoint, point)
                 compResult = compFunc(currentSlope, maxSlope)
-                if  compResult == 1:
+                if compResult == 1:
                     del maxSlopePoints[:]
                     maxSlope = currentSlope
                 if compResult >= 0:
                     lastMaxSlopeIndex = index
                     maxSlopePoints.append(point)
-            if maxSlope > basicSlope:
-                results += maxSlopePoints
-            elif maxSlope == basicSlope:
-                results += maxSlopePoints
+            results += maxSlopePoints
+            if compFunc(maxSlope, basicSlope) == 0:
                 break
             startPoint = maxSlopePoints[len(maxSlopePoints) - 1]
+            del maxSlopePoints[:]
             basicSlope = self.calSlope(startPoint, endPole)
             points = points[lastMaxSlopeIndex + 1:]
             maxSlope = basicSlope
@@ -133,5 +153,8 @@ class Solution(object):
 
 if __name__ == '__main__':
     solution = Solution()
-    points2 = [Point(3, 3), Point(1, 1), Point(2, 0), Point(2, 2), Point(4, 2), Point(2, 4)]
+    points2 = [
+        Point(3, 3), Point(9, 3), Point(4, 7), Point(9, 9), Point(8, 7),
+        Point(4, 1), Point(0, 3), Point(2, 7)
+    ]
     solution.outerTrees(points2)
