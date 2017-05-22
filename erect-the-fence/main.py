@@ -5,146 +5,65 @@ class Point(object):
         self.y = b
 
 class Solution(object):
-    def __init__(self):
-        self.points = []
-        self.poles = {}
-        self.intervals = {
-            'upLeft': [],
-            'upRight': [],
-            'downLeft': [],
-            'downRight': [],
-        }
 
     def outerTrees(self, points):
         """
         :type points: List[Point]
         :rtype: List[Point]
         """
-        def posCmp(slope1, slope2):
-            return 1 if slope1 > slope2 else 0 if slope1 == slope2 else -1
-        def negCmp(slope1, slope2):
-            return -1 if slope1 > slope2 else 0 if slope1 == slope2 else 1
-        self.points = points
-        self.collectPoles()
-        self.distPoints()
-        results = []
-        results += self.collectRopePoints(self.poles['left'], self.poles['up'], self.intervals['upLeft'], posCmp)
-        results += self.collectRopePoints(self.poles['up'], self.poles['right'], self.intervals['upRight'], negCmp)
-        results += self.collectRopePoints(self.poles['right'], self.poles['down'], self.intervals['downRight'], posCmp)
-        results += self.collectRopePoints(self.poles['down'], self.poles['left'], self.intervals['downLeft'], negCmp)
-        results += [pole for pole in self.poles.itervalues()]
-        results = self.collectNonDuplicatePoints(results)
-        self.printPoints('results', results)
-        return results
-
-    def collectNonDuplicatePoints(self, points):
-        coordinateList = [(point.x, point.y) for point in points]
-        return [point for point in dict(zip(coordinateList, points)).itervalues()]
-
-    def collectPoles(self):
-        xMax = xMin = self.points[0].x
-        yMax = yMin = self.points[0].y
-        poles = {'left': [], 'up': [], 'right': [], 'down': []}
-        for index, point in enumerate(self.points):
-            if point.x > xMax:
-                xMax = point.x
-                del poles['right'][:]
-                poles['right'].append(point)
-            elif point.x == xMax:
-                poles['right'].append(point)
-            if point.x < xMin:
-                xMin = point.x
-                del poles['left'][:]
-                poles['left'].append(point)
-            elif point.x == xMin:
-                poles['left'].append(point)
-            if point.y > yMax:
-                yMax = point.y
-                del poles['up'][:]
-                poles['up'].append(point)
-            elif point.y == yMax:
-                poles['up'].append(point)
-            if point.y < yMin:
-                yMin = point.y
-                del poles['down'][:]
-                poles['down'].append(point)
-            elif point.y == yMin:
-                poles['down'] = point
-        return poles
-        # self.printPoints('poles', [self.poles['left']] + [self.poles['up']] + [self.poles['right']] + [self.poles['down']])
-
-    def isFourPolesExisting(self, poles):
-        if len(set(poles['left'] + poles['right'] + poles['up'] + poles['down'])) <= 3:
-            return True
-
-    def isPointsEqual(self, point1, point2):
-        return True if point1.x == point2.x and point1.y == point2.y else False
-
-    def distPoints(self):
-        basicUpLeftSlope = self.calSlope(self.poles['up'], self.poles['left'])
-        basicUpRightSlope = self.calSlope(self.poles['right'], self.poles['up'])
-        basicDownRightSlope = self.calSlope(self.poles['down'], self.poles['right'])
-        basicDownLeftSlope = self.calSlope(self.poles['left'], self.poles['down'])
-        for point in self.points:
-            if self.poles['left'] == point or self.poles['right'] == point or self.poles['up'] == point or self.poles['down'] == point:
-                continue
-            if point.x >= self.poles['left'].x and point.y >= self.poles['left'].y and point.x <= self.poles['up'].x and point.y <= self.poles['up'].y:
-                currentSlope = self.calSlope(point, self.poles['left'])
-                if currentSlope >= basicUpLeftSlope:
-                    self.intervals['upLeft'].append(point)
-            if point.x >= self.poles['up'].x and point.y <= self.poles['up'].y and point.x <= self.poles['right'].x and point.y >= self.poles['right'].y:
-                currentSlope = self.calSlope(point, self.poles['up'])
-                if currentSlope <= basicUpRightSlope:
-                    self.intervals['upRight'].append(point)
-            if point.x <= self.poles['right'].x and point.y <= self.poles['right'].y and point.x >= self.poles['down'].x and point.y >= self.poles['down'].y:
-                currentSlope = self.calSlope(point, self.poles['right'])
-                if currentSlope >= basicDownRightSlope:
-                    self.intervals['downRight'].append(point)
-            if point.x <= self.poles['down'].x and point.y >= self.poles['down'].y and point.x >= self.poles['left'].x and point.y <= self.poles['left'].y:
-                currentSlope = self.calSlope(point, self.poles['down'])
-                if currentSlope <= basicDownLeftSlope:
-                    self.intervals['downLeft'].append(point)
-        self.intervals['upLeft'].sort(key = lambda item: (item.x, item.y))
-        self.intervals['upRight'].sort(key = lambda item: (item.x, 0 - item.y))
-        self.intervals['downRight'].sort(key = lambda item: (0 - item.x, 0 - item.y))
-        self.intervals['downLeft'].sort(key = lambda item: (0 - item.x, item.y))
-        self.printPoints('dist-up-left', self.intervals['upLeft'])
-        self.printPoints('dist-up-right', self.intervals['upRight'])
-        self.printPoints('dist-down-right', self.intervals['downRight'])
-        self.printPoints('dist-down-left', self.intervals['downLeft'])
-
-    def collectRopePoints(self, startPole, endPole, rawPoints, compFunc):
-        results = []
-        maxSlopePoints = []
-        points = rawPoints
-        startPoint = startPole
-        basicSlope = self.calSlope(startPoint, endPole)
-        maxSlope = basicSlope
-        lastMaxSlopeIndex = 0
-        while len(points) > 0:
-            for index, point in enumerate(points):
-                currentSlope = self.calSlope(startPoint, point)
-                compResult = compFunc(currentSlope, maxSlope)
-                if compResult == 1:
-                    del maxSlopePoints[:]
-                    maxSlope = currentSlope
-                if compResult >= 0:
-                    lastMaxSlopeIndex = index
-                    maxSlopePoints.append(point)
-            results += maxSlopePoints
-            if compFunc(maxSlope, basicSlope) == 0:
+        result = set()
+        firstIndex, firstPoint = self.findMostLeftPoint(points)
+        self.printPoints('left', [firstPoint])
+        result.add(firstPoint)
+        curIndex = firstIndex
+        curPoint = firstPoint
+        while True:
+            nextPoint = points[0]
+            nextIndex = 0
+            colinearPoints = []
+            for i, point in enumerate(points[1:]):
+                if i == curIndex:
+                    continue
+                slope = self.checkSlope(curPoint, nextPoint, point)
+                if slope > 0:
+                    del colinearPoints[:]
+                    nextPoint = point
+                    nextIndex = i
+                if slope == 0:
+                    isColinearPointFurther = (self.getDistanceSquare(curPoint, point) - self.getDistanceSquare(curPoint, nextPoint)) > 0
+                    if isColinearPointFurther is True:
+                        colinearPoints.append(nextPoint)
+                        nextPoint = point
+                        nextIndex = i
+                    else:
+                        colinearPoints.append(point)
+            self.printPoints('next', [nextPoint])
+            result.add(nextPoint)
+            for point in colinearPoints:
+                result.add(point)
+            if firstIndex == nextIndex:
                 break
-            startPoint = maxSlopePoints[len(maxSlopePoints) - 1]
-            del maxSlopePoints[:]
-            basicSlope = self.calSlope(startPoint, endPole)
-            points = points[lastMaxSlopeIndex + 1:]
-            maxSlope = basicSlope
-        return results
+            curIndex = nextIndex
+            curPoint = nextPoint
+        self.printPoints('result', list(result))
+        return list(result)
 
-    def calSlope(self, point1, point2):
-        if point1.x == point2.x:
-            return float('infinity')
-        return abs((point1.y - point2.y + 0.0) / (point1.x - point2.x))
+    def findMostLeftPoint(self, points):
+        first = points[0]
+        index = 0
+        xMin = first.x
+        for i, point in enumerate(points):
+            if point.x < xMin:
+                first = point
+                index = 0
+        return (index, first)
+
+    # p1: cur, p2: next, p3: point
+    def checkSlope(self, p1, p2, p3):
+        return (p3.y - p2.y) * (p3.x - p1.x) - (p3.y - p1.y) * (p3.x - p2.x)
+
+    def getDistanceSquare(self, p1, p2):
+        return pow((p2.y - p1.y), 2) + pow((p2.x - p1.x), 2)
 
     def printPoints(self, title, points):
         print(title)
@@ -152,9 +71,8 @@ class Solution(object):
             print('(' + str(point.x) + ', ' + str(point.y) + ')')
 
 if __name__ == '__main__':
-    solution = Solution()
-    points2 = [
-        Point(3, 3), Point(9, 3), Point(4, 7), Point(9, 9), Point(8, 7),
-        Point(4, 1), Point(0, 3), Point(2, 7)
+    points = [
+        Point(0, 8), Point(9, 8), Point(2, 4)
     ]
-    solution.outerTrees(points2)
+    solution = Solution()
+    solution.outerTrees(points)
