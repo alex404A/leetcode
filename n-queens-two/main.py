@@ -1,6 +1,5 @@
-
 class Solution(object):
-    def solveNQueens(self, n):
+    def totalNQueens(self, n):
         def DFS(queens, xy_dif, xy_sum):
             p = len(queens)
             if p==n:
