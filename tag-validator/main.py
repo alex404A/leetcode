@@ -38,6 +38,7 @@ class Solution(object):
                     return False
                 i = self.processEndDataMatch(endTagPattern)
                 continue
+            i += 1
         return True
 
     def processStartTagMatch(self, match):
