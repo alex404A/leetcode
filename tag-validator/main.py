@@ -19,10 +19,12 @@ class Solution(object):
             return False
         i = 0
         while i < len(code):
-            if code[i] == '<':
-                startTagMatch = self.startTagPattern.match(code, i)
-                endTagMatch = self.endTagPattern.match(code, i)
-                startCdataMatch = self.startCdataMatch.match(code, i)
+            if code[i] != '<':
+                i += 1
+                continue
+            startTagMatch = self.startTagPattern.match(code, i)
+            endTagMatch = self.endTagPattern.match(code, i)
+            startCdataMatch = self.startCdataMatch.match(code, i)
             if startTagMatch is not None:
                 i = self.processStartTagMatch(startTagMatch)
                 continue
@@ -38,7 +40,6 @@ class Solution(object):
                     return False
                 i = self.processEndDataMatch(endTagPattern)
                 continue
-            i += 1
         return True
 
     def processStartTagMatch(self, match):
