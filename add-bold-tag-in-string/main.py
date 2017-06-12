@@ -1,3 +1,5 @@
+import time
+
 class Solution(object):
     def __init__(self):
         self.startToWordDict = {}
@@ -10,18 +12,20 @@ class Solution(object):
         :rtype: str
         """
         if len(wordList) == 0:
-            return s
+            return rawStr
 
         self.rawStr = rawStr
         self.wordList = wordList
-        self.leastWordLen = self.wordList[0]
+        self.leastWordLen = len(self.wordList[0])
         for word in self.wordList[1:]:
             if len(word) < self.leastWordLen:
                 self.leastWordLen = len(word)
 
         self.buildWordRelation()
-        print(self.startToWordDict)
-        print(self.wordStartSet)
+        # print(self.startToWordDict)
+        # print(self.wordStartSet)
+        tagPosList = self.getTagPosList()
+        return self.addTags(tagPosList)
 
     def buildWordRelation(self):
 
@@ -39,7 +43,7 @@ class Solution(object):
                 for i in range(len(word)):
                     depStartList = getDepStartList(word[i: i + self.leastWordLen])
                     self.startToWordDict[wordStart][word].extend(getDepWordList(word, i, depStartList))
-                    self.startToWordDict[wordStart][word].sort(key = lambda dep: dep[0] + len(dep[2]), reverse=True)
+                    # self.startToWordDict[wordStart][word].sort(key = lambda dep: dep[0] + len(dep[2]), reverse=True)
 
         def getDepStartList(wordStart):
             result = []
@@ -54,10 +58,10 @@ class Solution(object):
         def getDepWordList(rawWord, index, depStartList):
             result = []
             for depStart in depStartList:
-                if rawWord[0:self.leastWordLen] == depStart:
-                    depWords = [(index, depStart, word) for word in self.startToWordDict[depStart].iterkeys() if len(word) > len(rawWord)]
+                if rawWord[0:self.leastWordLen] == depStart and index == 0:
+                    depWords = [(index, depStart, word) for word in self.startToWordDict[depStart].iterkeys() if word != rawWord and index + len(word) > len(rawWord)]
                 else:
-                    depWords = [(index, depStart, word) for word in self.startToWordDict[depStart].iterkeys()]
+                    depWords = [(index, depStart, word) for word in self.startToWordDict[depStart].iterkeys() if index + len(word) > len(rawWord)]
                 result.extend(depWords)
             return result
 
@@ -69,6 +73,7 @@ class Solution(object):
             result = {}
             for start in self.wordStartSet:
                 result[start] = [word for word in self.startToWordDict[start].iterkeys()]
+                result[start].sort(key = lambda word: len(word), reverse=True)
             return result
 
         def process(startOfWord, startIndex):
@@ -76,8 +81,9 @@ class Solution(object):
                 for dep in deps:
                     partStr = self.rawStr[posDict['start'] + dep[0]:]
                     if dep[0] + len(dep[2]) > len(word) and partStr.startswith(dep[2]) is True:
-                        posDict['end'] = posDict['start'] + len(dep[2]) + dep[0]
-                        posDict['start'] = posDict['end']
+                        tmp = posDict['start'] + dep[0]
+                        posDict['end'] = tmp + len(dep[2])
+                        posDict['start'] = tmp
                         processOverlap(dep[2], self.startToWordDict[dep[1]][dep[2]])
                         break
 
@@ -98,7 +104,7 @@ class Solution(object):
         pt = 0
         while pt <= len(self.rawStr) - self.leastWordLen:
             start = self.rawStr[pt: pt + self.leastWordLen]
-            wordDict = self.startToWordDict[start]
+            wordDict = self.startToWordDict.get(start)
             if wordDict is None:
                 pt += 1
                 continue
@@ -110,8 +116,29 @@ class Solution(object):
                 pt = startPt
         return tagPosList
 
+    def addTags(self, tagPosList):
+        newTagPosList = []
+
+        def mergeAdjacentTag():
+            if len(tagPosList) == 0:
+                return
+            curStart = tagPosList[0][0]
+            for i in range(len(tagPosList)):
+                if i + 1 < len(tagPosList) and tagPosList[i][1] != tagPosList[i + 1][0]:
+                    newTagPosList.append((curStart, tagPosList[i][1]))
+                    curStart = tagPosList[i + 1][0]
+                elif i + 1 == len(tagPosList):
+                    newTagPosList.append((curStart, tagPosList[i][1]))
+
+        mergeAdjacentTag()
+        formattedStr = self.rawStr
+        offset = 0
+        for start, end in newTagPosList:
+            formattedStr = formattedStr[:start + offset] + '<b>' + formattedStr[start + offset:]
+            offset += 3
+            formattedStr = formattedStr[:end + offset] + '</b>' + formattedStr[end + offset:]
+            offset += 4
+        return formattedStr
+
 if __name__ == '__main__':
     solution = Solution()
-    s = 'aaabbcc'
-    wordList = ['aaa', 'aab', 'bc']
-    solution.addBoldTag(s, wordList)
