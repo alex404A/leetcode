@@ -1,11 +1,9 @@
 def hehe():
-    a = 2
-    def lala():
-        global a
+    a = {1: 2}
+    def lala(b):
         # print(a)
-        a = 3
-        print(a)
-    lala()
+        b[1] = 3
+    lala(a)
     print(a)
 
 hehe()

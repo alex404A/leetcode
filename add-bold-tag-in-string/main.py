@@ -20,10 +20,12 @@ class Solution(object):
                 self.leastWordLen = len(word)
 
         self.buildWordRelation()
+        print(self.startToWordDict)
+        print(self.wordStartSet)
 
     def buildWordRelation(self):
 
-        def buildself.startToWordDict():
+        def buildStartToWordDict():
             for word in self.wordList:
                 wordStart = word[0:self.leastWordLen]
                 if self.startToWordDict.get(wordStart) is None:
@@ -49,7 +51,7 @@ class Solution(object):
                 result.append(wordStart)
             return result
 
-        def getDepWordList(index, depStartList):
+        def getDepWordList(rawWord, index, depStartList):
             result = []
             for depStart in depStartList:
                 if rawWord[0:self.leastWordLen] == depStart:
@@ -59,7 +61,7 @@ class Solution(object):
                 result.extend(depWords)
             return result
 
-        buildself.startToWordDict()
+        buildStartToWordDict()
         addDepInDict()
 
     def getTagPosList(self):
@@ -70,23 +72,26 @@ class Solution(object):
             return result
 
         def process(startOfWord, startIndex):
-            def processOverlap(tmpStartIndex, word, deps):
-                global endIndex
+            def processOverlap(word, deps):
                 for dep in deps:
-                    partStr = self.rawStr[tmpStartIndex + dep[0]:]
+                    partStr = self.rawStr[posDict['start'] + dep[0]:]
                     if dep[0] + len(dep[2]) > len(word) and partStr.startswith(dep[2]) is True:
-                        endIndex = tmpStartIndex + len(dep[2]) + dep[0]
-                        tmpStartIndex = endIndex
-                        processOverlap(tmpStartIndex, dep[2], self.startToWordDict[dep[1]][dep[2]])
+                        posDict['end'] = posDict['start'] + len(dep[2]) + dep[0]
+                        posDict['start'] = posDict['end']
+                        processOverlap(dep[2], self.startToWordDict[dep[1]][dep[2]])
                         break
 
-            endIndex = startIndex
-            partStr = self.rawStr[startIndex:]
+            posDict = {
+                'start': startIndex,
+                'end': startIndex
+            }
+            partStr = self.rawStr[posDict['start']:]
             for word in startToWords[startOfWord]:
                 if partStr.startswith(word) is True:
-                   endIndex = startIndex + len(word)
-                   processOverlap(startIndex, word, self.startToWordDict[startOfWord][word])
-            return endIndex
+                   posDict['end'] = posDict['start'] + len(word)
+                   processOverlap(word, self.startToWordDict[startOfWord][word])
+                   break
+            return posDict['end']
 
         startToWords = getStartToWordListDict()
         tagPosList = []
@@ -107,6 +112,6 @@ class Solution(object):
 
 if __name__ == '__main__':
     solution = Solution()
-    s = 'test'
-    wordList = ['abc', 'abcdef', 'xyz', 'yza', 'bcd', 'hij']
+    s = 'aaabbcc'
+    wordList = ['aaa', 'aab', 'bc']
     solution.addBoldTag(s, wordList)
