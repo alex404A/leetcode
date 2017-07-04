@@ -30,7 +30,9 @@ class Solution(object):
             nums = numsList[i]
             startIndex = interval[0]
             endIndex = interval[1]
-            for j in range(startIndex, endIndex + 1):
+            maxIndex = max(startIndex, endIndex)
+            minIndex = min(startIndex, endIndex)
+            for j in range(minIndex, maxIndex + 1):
                 if commonNumDict.get(nums[j]) is None:
                     commonNumDict[nums[j]] = set()
                 commonNumDict[nums[j]].add(i)
@@ -69,6 +71,22 @@ class Solution(object):
 
 if __name__ == '__main__':
     solutioon = Solution()
-    numsList = [[-38,15,17,18],[-34,46,58,59,61],[-55,-31,-13,64,82,82,83,84,85],[-3,63,70,90],[2,6,10,28,28,32,32,32,33],[-23,82,88,88,88,89],[33,60,72,74,75],[-5,44,44,57,58,58,60],[-29,-22,-4,-4,17,18,19,19,19,20],[22,57,82,89,93,94],[24,38,45],[-100,-56,41,49,50,53,53,54],[-76,-69,-66,-53,-27,-1,9,29,31,32,32,32,34],[22,47,56],[-34,-28,7,44]]
+    numsList = [
+        [-38,15,17,18],
+        [-34,46,58,59,61],
+        [-55,-31,-13,64,82,82,83,84,85],
+        [-3,63,70,90],
+        [2,6,10,28,28,32,32,32,33],
+        [-23,82,88,88,88,89],
+        [33,60,72,74,75],
+        [-5,44,44,57,58,58,60],
+        [-29,-22,-4,-4,17,18,19,19,19,20],
+        [22,57,82,89,93,94],
+        [24,38,45],
+        [-100,-56,41,49,50,53,53,54],
+        [-76,-69,-66,-53,-27,-1,9,29,31,32,32,32,34],
+        [22,47,56],
+        [-34,-28,7,44]
+    ]
     print(numsList)
     print(solutioon.smallestRange(numsList))
