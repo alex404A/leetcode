@@ -11,12 +11,14 @@ var findSubstringInWraproundString = function(p) {
     return l.charCodeAt(0) - 'a'.charCodeAt(0)
   }
 
-  function getExtNum(start, cnt, l) {
-    var startIndex = getIndex(start)
-    var curIndex = getIndex(l)
-    var loop = cnt / 26
-    var remain = startIndex + cnt % 26 - curIndex > 0 ? 1 : 0
-    return loop + remain
+  function getExtNum(startIndex, cnt, curIndex) {
+    var remain
+    if (startIndex - curIndex <= 0) {
+      remain = curIndex - startIndex
+    } else {
+      remain = 26 - startIndex + curIndex
+    }
+    return cnt - remain
   }
 
   function iterToAdd(l) {
@@ -35,10 +37,19 @@ var findSubstringInWraproundString = function(p) {
   var cnt = 1
   cntArr[getIndex(start)] = 1
   var index
+  var extNum
+  var j = 0
   for (var i = 1; i < p.length; i++) {
     if (possibleCmbs[p[i - 1] + p[i]]) {
       cnt += 1
-      iterToAdd(p[i])
+      for (j = 0; j < cntArr.length; j++) {
+        // console.log("startIndex: " + getIndex(start) + ", cnt: " + cnt + " curIndex: " + j)
+        extNum = getExtNum(getIndex(start), cnt, j)
+        // console.log(extNum)
+        if (cntArr[j] < extNum) {
+          cntArr[j] = extNum
+        }
+      }
     } else {
       start = p[i]
       cnt = 1
@@ -75,6 +86,5 @@ function getCntArr () {
   return result
 }
 
-
-var p = 'zabcdbcd'
+var p = 'zabcdefghijklmnopqrstuvwxyz'
 console.log(findSubstringInWraproundString(p))
