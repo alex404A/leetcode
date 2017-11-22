@@ -1,6 +1,5 @@
 class Solution(object):
     def __init__(self):
-        self.statistics = {}
         self.pt = 0
         self.formula = ''
 
