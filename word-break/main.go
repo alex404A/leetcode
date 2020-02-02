@@ -1,0 +1,136 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+type Trie struct {
+	root *Node
+}
+
+type Node struct {
+	s        string
+	children []*Node
+	end      bool
+}
+
+func (trie *Trie) find(s string, index int) []int {
+	root := trie.root
+	result := make([]int, 0)
+	for i := index; i < len(s); i++ {
+		b := s[i : i+1]
+		child, ok := biSearch(b, root)
+		if !ok {
+			break
+		}
+		if child.end {
+			result = append(result, i)
+		}
+		root = child
+	}
+	return result
+}
+
+func biSearch(target string, node *Node) (child *Node, ok bool) {
+	low := 0
+	high := len(node.children) - 1
+	for low <= high {
+		mid := (low + high) / 2
+		childNode := node.children[mid]
+		if childNode.s == target {
+			child = childNode
+			ok = true
+			return
+		}
+		if childNode.s < target {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	child = nil
+	ok = false
+	return
+}
+
+func wordBreak(s string, wordDict []string) bool {
+	root := &Node{"", make([]*Node, 0), false}
+	trie := &Trie{root}
+	buildTree(trie.root, wordDict)
+	mem := make(map[int]bool)
+	return check(s, 0, trie, mem)
+}
+
+func check(s string, index int, trie *Trie, mem map[int]bool) bool {
+	if result, ok := mem[index]; ok {
+		return result
+	}
+	candidates := trie.find(s, index)
+	for _, candidate := range candidates {
+		if candidate == len(s)-1 {
+			return true
+		}
+		result := check(s, candidate+1, trie, mem)
+		if result {
+			return true
+		} else {
+			mem[candidate+1] = false
+		}
+	}
+	return false
+}
+
+type TmpNode struct {
+	start    string
+	children []string
+}
+
+func buildTree(root *Node, wordDict []string) {
+	m := make(map[string][]string)
+	for _, word := range wordDict {
+		first := word[0:1]
+		if _, ok := m[first]; !ok {
+			m[first] = make([]string, 0)
+		}
+		if len(word) > 1 {
+			m[first] = append(m[first], word[1:])
+		} else {
+			m[first] = append(m[first], "")
+		}
+	}
+	tmpNodes := make([]*TmpNode, 0)
+	for k, v := range m {
+		tmpNodes = append(tmpNodes, &TmpNode{k, v})
+	}
+	sort.SliceStable(tmpNodes, func(i, j int) bool {
+		return tmpNodes[i].start < tmpNodes[j].start
+	})
+	for _, tmpNode := range tmpNodes {
+		node := &Node{tmpNode.start, make([]*Node, 0), false}
+		root.children = append(root.children, node)
+		childDict := make([]string, 0)
+		for _, remain := range tmpNode.children {
+			if remain == "" {
+				node.end = true
+			} else {
+				childDict = append(childDict, remain)
+			}
+		}
+		buildTree(node, childDict)
+	}
+}
+
+func test(s string, wordDict []string, expected bool) {
+	actual := wordBreak(s, wordDict)
+	if actual != expected {
+		fmt.Printf("%s can't be fit into %v\n", s, wordDict)
+	}
+}
+
+func main() {
+	// test("leetcode", []string{"leet", "code"}, true)
+	// test("applepenapple", []string{"apple", "pen"}, true)
+	// test("catsandog", []string{"cats", "dog", "sand", "and", "cat"}, false)
+	test("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab", []string{"a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa", "aaaaaaa", "aaaaaaaa", "aaaaaaaaa", "aaaaaaaaaa"}, true)
+}
