@@ -23,14 +23,15 @@ class Solution {
             } else if (this.x > other.x) {
                 return 1;
             }
+            if (this.y == other.y) {
+                return this.isStart ? -1 : 1;
+            }
             if (this.isStart && other.isStart) {
-                return this.y >= other.y ? -1 : 1;
+                return this.y > other.y ? -1 : 1;
             } else if (!this.isStart && !other.isStart) {
-                return this.y >= other.y ? 1 : -1;
-            } else if (!this.isStart && other.isStart) {
-                return this.y < other.y ? -1 : 1;
+                return this.y > other.y ? 1 : -1;
             } else {
-                return this.y < other.y ? 1 : -1;
+                return this.isStart ? -1 : 1;
             }
         }
     }
@@ -39,18 +40,20 @@ class Solution {
         int[][] buildings = new int[][]{
             // new int[]{0, 2, 3},
             // new int[]{2, 5, 3},
-            // new int[]{2, 9, 10},
+            new int[]{2, 9, 10},
+            new int[]{9, 12, 15},
             // new int[]{3, 7, 15},
             // new int[]{5, 12, 12},
             // new int[]{15, 20, 10},
             // new int[]{19, 24, 8},
-            new int[]{0,5,7},
-            new int[]{5,10,7},
-            new int[]{5,10,12},
-            new int[]{10,15,7},
-            new int[]{15,20,7},
-            new int[]{15,20,12},
-            new int[]{20,25,7},
+
+            //new int[]{0,5,7},
+            //new int[]{5,10,7},
+            //new int[]{5,10,12},
+            //new int[]{10,15,7},
+            //new int[]{15,20,7},
+            //new int[]{15,20,12},
+            //new int[]{20,25,7},
 
         };
         Solution solution = new Solution();
@@ -66,35 +69,20 @@ class Solution {
         List<Node> nodes = buildNodes(buildings);
         PriorityQueue<Integer> pq = new PriorityQueue<>(Collections.reverseOrder());
         pq.add(0);
-        pq.add(nodes.get(0).y);
-        results.add(List.of(nodes.get(0).x, nodes.get(0).y));
-        nodes = nodes.subList(1, nodes.size());
         for (Node node: nodes) {
             if (node.isStart) {
                 Integer preMax = pq.peek();
                 pq.add(node.y);
                 Integer curMax = pq.peek();
                 if (preMax < curMax) {
-                    if (results.get(results.size() - 1).get(0) == node.x) {
-                        if (results.get(results.size() - 1).get(1) < node.y) {
-                            results.set(results.size() - 1, List.of(node.x, node.y));
-                        }
-                    } else {
-                        results.add(List.of(node.x, curMax));
-                    }
+                    results.add(List.of(node.x, curMax));
                 }
             } else {
                 Integer preMax = pq.peek();
                 pq.remove(node.y);
                 Integer curMax = pq.peek();
                 if (curMax < preMax) {
-                    if (results.get(results.size() - 1).get(0) == node.x) {
-                        if (results.get(results.size() - 1).get(1) < node.y) {
-                            results.set(results.size() - 1, List.of(node.x, node.y));
-                        }
-                    } else {
-                        results.add(List.of(node.x, curMax));
-                    }
+                    results.add(List.of(node.x, curMax));
                 }
             }
         }
