@@ -3,8 +3,7 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/range-sum-query-mutable" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/k-closest-point-to-origin" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/MedianFinder" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
